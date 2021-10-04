@@ -1,0 +1,13 @@
+image: python:3.8
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          name: Try compile
+          caches:
+            - pip
+          script:
+            - if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            - python -m py_compile server.py
+            - python -m py_compile test_client.py
