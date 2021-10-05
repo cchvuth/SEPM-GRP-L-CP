@@ -87,6 +87,7 @@ class ConnectionManager:
                     register:{username},
                     get_state
                     winner (who sends win),
+                    draw,
                     {any game data}
             '''
 
@@ -121,24 +122,15 @@ class ConnectionManager:
                     if data == 'get_state':
                         send_data(conn, current_game.state)
                     elif data == 'winner':
-                        score_file = scoreboard_manager.add_score(player_info.username, opponent_info.username)
-
-                        player_info.leave_game()
-                        send_data(player_info.conn, score_file)
-                        
-                        opponent_info.leave_game()
-                        send_data(opponent_info.conn, score_file)
-                        
-                        game_manager.del_game(game_id)
-                        game_manager.decrement_player_in_game(2)
-
-                        print('Current players in game:', game_manager.player_in_game_counts)
-
-                        queue_manager.add_player(player_info.conn_id)
-                        queue_manager.add_player(opponent_info.conn_id)
-                        
-                        while queue_manager.start_game():
-                            pass
+                        game_manager.end_game(
+                            game_id,
+                            scoreboard_manager.add_score(player_info.username, opponent_info.username)
+                        )
+                    elif data == 'draw':
+                        game_manager.end_game(
+                            game_id,
+                            scoreboard_manager.add_draw(player_info.username, opponent_info.username)
+                        )
                     else:
                         current_game.state = data
                         send_data(conn, 'ok')

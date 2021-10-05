@@ -1,4 +1,5 @@
 import uuid
+from transfer_protocol import send_data
 
 
 class Game:
@@ -61,6 +62,32 @@ class GameManager:
         game.state = 'game_ready'
         print('Game ready', game_id)
         return game_id
+
+    def end_game(self, game_id, score_file):
+        from connection_manager import connection_manager
+        from queue_manager import queue_manager
+
+        players = list(
+            map(
+                lambda conn_id: connection_manager.get_player(conn_id),
+                self.get_game(game_id).conn_ids
+            )
+        )
+
+        for player in players:
+            player.leave_game()
+            send_data(player.conn, score_file)
+
+        self.del_game(game_id)
+        self.decrement_player_in_game(2)
+
+        print('Current players in game:', game_manager.player_in_game_counts)
+
+        for player in players:
+            queue_manager.add_player(player.conn_id)
+
+        while queue_manager.start_game():
+            pass
 
 
 game_manager = GameManager()
