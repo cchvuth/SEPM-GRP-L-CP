@@ -1,4 +1,5 @@
 # README #
+Software Engineering and Project Management Group L
 
 ### Setup
 * [Install python](https://www.python.org/downloads/)
